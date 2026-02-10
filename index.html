@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SexyStar - Шлёпай!</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -10,20 +10,23 @@
     <style>
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(to bottom, #ff69b4, #8a2be2);
             color: white;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             overflow: hidden;
+            /* Запрет выделения текста */
+            user-select: none;
+            -webkit-user-select: none;
         }
         
         h1 {
-            font-size: 2.8em;
+            font-size: 2.2em;
             margin: 10px 0;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
@@ -33,22 +36,22 @@
             height: 320px;
             object-fit: cover;
             border-radius: 24px;
-            margin: 15px 0;
-            transition: transform 0.15s ease, opacity 0.3s ease;
+            margin: 10px 0;
+            transition: transform 0.1s ease, opacity 0.3s ease;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            user-select: none;
+            pointer-events: none; /* Чтобы картинка не мешала кликам */
         }
         
         #level {
-            font-size: 1.5em;
+            font-size: 1.3em;
             margin: 5px 0;
             font-weight: bold;
             color: #ffd700;
         }
         
         #counter {
-            font-size: 2.4em;
-            margin: 10px 0;
+            font-size: 2em;
+            margin: 5px 0;
             font-weight: bold;
         }
         
@@ -56,29 +59,30 @@
             background: rgba(0,0,0,0.4);
             border-radius: 16px;
             padding: 12px 20px;
-            margin: 15px 0;
-            max-width: 90%;
-            min-height: 60px;
-            font-size: 1.2em;
-            line-height: 1.4;
-            opacity: 0.9;
+            margin: 10px 0;
+            width: 80%;
+            min-height: 50px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .buttons {
             display: flex;
-            gap: 20px;
+            flex-direction: column;
+            gap: 15px;
             margin-top: 10px;
+            width: 80%;
         }
         
         button {
-            font-size: 2em;
-            padding: 18px 50px;
             border: none;
             border-radius: 60px;
             color: white;
             cursor: pointer;
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            transition: all 0.2s;
+            transition: all 0.1s;
             position: relative;
             overflow: hidden;
             touch-action: manipulation;
@@ -86,42 +90,47 @@
         
         #slap-btn {
             background: #ff1493;
+            font-size: 1.8em;
+            padding: 20px;
+            font-weight: bold;
         }
         
         #reset-btn {
-            background: #555;
-            font-size: 1.4em;
-            padding: 12px 30px;
+            background: rgba(255,255,255,0.2);
+            font-size: 0.9em;
+            padding: 10px;
+            color: #eee;
         }
         
-        button:active {
-            transform: scale(0.95);
+        #slap-btn:active {
+            transform: scale(0.92);
+            background: #ff69b4;
         }
-        
-        /* Ripple */
-        @keyframes rippleAnim {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(4); opacity: 0; }
-        }
+
+        /* Анимация Ripple */
         .ripple {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255,255,255,0.7);
-            animation: rippleAnim 0.7s linear;
+            background: rgba(255,255,255,0.5);
+            transform: scale(0);
+            animation: rippleAnim 0.5s linear;
             pointer-events: none;
+        }
+        @keyframes rippleAnim {
+            to { transform: scale(4); opacity: 0; }
         }
         
         /* Сердечки */
-        @keyframes floatHeart {
-            0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-            100% { opacity: 0; transform: translateY(-180px) scale(1.6) rotate(720deg); }
-        }
         .heart {
             position: fixed;
             pointer-events: none;
             z-index: 9999;
-            font-size: 2.2em;
-            animation: floatHeart 1.5s ease-out forwards;
+            font-size: 1.5em;
+            animation: floatHeart 1.2s ease-out forwards;
+        }
+        @keyframes floatHeart {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-150px) scale(1.5) rotate(45deg); }
         }
     </style>
 </head>
@@ -134,71 +143,51 @@
     <div id="level">Уровень: 1</div>
     <div id="counter">Шлепков: 0</div>
     
-    <div id="chat">Привет... ты готов меня шлёпать? 💕</div>
+    <div id="chat">Загрузка... 💕</div>
     
     <div class="buttons">
         <button id="slap-btn">ШЛЁП!</button>
-        <button id="reset-btn">Сбросить прогресс</button>
+        <button id="reset-btn">Начать сначала</button>
     </div>
 
     <script>
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
 
-        // Уровни и картинки (надёжные ссылки)
         const girlImages = {
             1: "https://cdn.iz.ru/sites/default/files/inline/s_novim_godom_gif_39.gif",
             2: "https://cdn.iz.ru/sites/default/files/inline/IMG_0581.gif",
             3: "https://cdn.iz.ru/sites/default/files/inline/IMG_0582.gif"
         };
 
-        // Реакции девушки (по уровням + случайные)
         const reactions = {
-            1: [
-                "Ой... нежно, пожалуйста 💕",
-                "Ты такой смелый... мне нравится 😳",
-                "Ещё разок? Я стесняюсь...",
-                "Ммм... тепло разливается внутри...",
-                "Не останавливайся, милый~"
-            ],
-            2: [
-                "Сильнее! Я уже не такая стеснительная 😈",
-                "Дааа... вот так, шлёпай меня!",
-                "Ты заставляешь меня дрожать... 🔥",
-                "Хочешь увидеть, на что я способна?",
-                "Ещё! Я становлюсь горячее..."
-            ],
-            3: [
-                "Ты мой хозяин теперь... шлёпай без жалости 💦",
-                "Ахх... глубже, сильнее!",
-                "Я вся твоя... делай со мной что хочешь 😏",
-                "Мммм... я кончаю от твоих шлепков...",
-                "Хочешь меня всю? Продолжай~"
-            ]
+            1: ["Ой... нежно, пожалуйста 💕", "Ты такой смелый... 😳", "Ещё разок?", "Ммм... приятно..."],
+            2: ["Сильнее! 😈", "Дааа... вот так!", "Ты меня заводишь... 🔥", "Ещё! Не останавливайся!"],
+            3: ["Я вся твоя... 😏", "Ахх... глубже!", "Шлёпай меня без жалости 💦", "Ты мой господин!"]
         };
 
         let count = parseInt(localStorage.getItem('slapCount') || '0', 10);
         let currentLevel = 1;
-        let sessionSlaps = 0; // шлепки за текущую сессию
+        let sessionSlaps = 0;
 
         const counterEl = document.getElementById('counter');
-        const levelEl   = document.getElementById('level');
-        const girlEl    = document.getElementById('girl');
-        const chatEl    = document.getElementById('chat');
-        const slapBtn   = document.getElementById('slap-btn');
-        const resetBtn  = document.getElementById('reset-btn');
-        const container = document.body;
+        const levelEl = document.getElementById('level');
+        const girlEl = document.getElementById('girl');
+        const chatEl = document.getElementById('chat');
+        const slapBtn = document.getElementById('slap-btn');
+        const resetBtn = document.getElementById('reset-btn');
 
-        function updateLevelAndImage() {
+        function updateUI() {
             let newLevel = count >= 800 ? 3 : count >= 300 ? 2 : 1;
             if (newLevel !== currentLevel) {
                 currentLevel = newLevel;
-                levelEl.textContent = `Уровень: ${currentLevel}`;
-                girlEl.src = girlImages[currentLevel] || girlImages[1];
-                girlEl.style.opacity = 0;
-                setTimeout(() => { girlEl.style.opacity = 1; }, 300);
-                showReaction("Уровень повышен! Я изменилась для тебя... 😘");
+                girlEl.src = girlImages[currentLevel];
+                showReaction("Ох... я перехожу на новый уровень для тебя... 😘");
             }
+            levelEl.textContent = `Уровень: ${currentLevel}`;
+            counterEl.textContent = `Шлепков: ${count}`;
+            if(!girlEl.src) girlEl.src = girlImages[currentLevel];
         }
 
         function showReaction(text = null) {
@@ -207,92 +196,71 @@
                 text = lvlReactions[Math.floor(Math.random() * lvlReactions.length)];
             }
             chatEl.textContent = text;
-            chatEl.style.opacity = 0;
-            setTimeout(() => { chatEl.style.opacity = 0.9; }, 100);
         }
 
-        // Инициализация
-        counterEl.textContent = `Шлепков: ${count}`;
-        updateLevelAndImage();
-        showReaction(); // первое приветствие
+        function createEffect(e) {
+            // Координаты для Ripple и сердечек
+            const rect = slapBtn.getBoundingClientRect();
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : rect.left + rect.width/2);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : rect.top + rect.height/2);
 
-        // Сердечки и ripple (как раньше)
-        function createHearts(x, y, qty = 18) {
-            for (let i = 0; i < qty; i++) {
-                const heart = document.createElement('div');
-                heart.innerHTML = Math.random() > 0.5 ? '💖' : '💕';
-                heart.className = 'heart';
-                heart.style.left = (x + (Math.random() - 0.5) * 240) + 'px';
-                heart.style.top  = (y + (Math.random() - 0.5) * 240) + 'px';
-                const dur = 1.1 + Math.random() * 0.7;
-                heart.style.animationDuration = dur + 's';
-                heart.style.transform = `scale(${0.9 + Math.random() * 0.8}) rotate(${Math.random() * 720}deg)`;
-                container.appendChild(heart);
-                setTimeout(() => heart.remove(), dur * 1000 + 200);
-            }
-        }
-
-        function createRipple(e) {
+            // Ripple
             const ripple = document.createElement('span');
-            const rect = slapBtn.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height) * 2;
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
+            ripple.className = 'ripple';
+            const size = Math.max(rect.width, rect.height);
             ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            ripple.classList.add('ripple');
+            ripple.style.left = (clientX - rect.left - size/2) + 'px';
+            ripple.style.top = (clientY - rect.top - size/2) + 'px';
             slapBtn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 700);
+            setTimeout(() => ripple.remove(), 500);
+
+            // Сердечко
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '💖';
+            heart.style.left = clientX + 'px';
+            heart.style.top = clientY + 'px';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 1200);
         }
 
-        // Шлёпок
-        function slap(e) {
-            count += 1 + Math.floor(Math.random() * 6);
+        function handleSlap(e) {
+            e.preventDefault(); // Важно для тач-событий
+            count += 1 + Math.floor(Math.random() * 3);
             sessionSlaps++;
-            counterEl.textContent = `Шлепков: ${count}`;
-            localStorage.setItem('slapCount', count.toString());
+            localStorage.setItem('slapCount', count);
 
-            girlEl.style.transform = 'scale(1.25) rotate(8deg)';
-            setTimeout(() => girlEl.style.transform = 'scale(1) rotate(0deg)', 160);
+            // Анимация картинки
+            girlEl.style.transform = 'scale(1.1) translateY(-10px)';
+            setTimeout(() => girlEl.style.transform = 'scale(1)', 100);
 
-            createRipple(e);
-            const rect = slapBtn.getBoundingClientRect();
-            createHearts(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            createEffect(e);
+            updateUI();
 
-            updateLevelAndImage();
-
-            // Реакция каждые 3–5 шлепков за сессию или всегда при смене уровня
-            if (sessionSlaps % (3 + Math.floor(Math.random() * 3)) === 0) {
-                showReaction();
-            }
+            if (sessionSlaps % 5 === 0) showReaction();
         }
 
-        // Сброс прогресса
-        function resetProgress() {
-            if (confirm("Ты уверен? Всё обнулится, включая уровни и картинки.")) {
+        // Поддержка и клика и тача для скорости
+        slapBtn.addEventListener('touchstart', handleSlap, {passive: false});
+        slapBtn.addEventListener('click', (e) => {
+            if (e.pointerType === 'mouse') handleSlap(e); 
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (confirm("Начать всё сначала?")) {
                 count = 0;
-                sessionSlaps = 0;
-                currentLevel = 1;
                 localStorage.setItem('slapCount', '0');
-                counterEl.textContent = `Шлепков: 0`;
-                levelEl.textContent = `Уровень: 1`;
-                girlEl.src = girlImages[1];
-                showReaction("Всё сначала... начнём заново? 😏");
+                updateUI();
+                showReaction("Ну вот... давай по новой 😏");
             }
-        }
+        });
 
-        slapBtn.addEventListener('click', slap);
-        resetBtn.addEventListener('click', resetProgress);
-
-        // Приветствие с именем
-        if (Telegram.WebApp.initDataUnsafe.user) {
-            const u = Telegram.WebApp.initDataUnsafe.user;
-            console.log(`Привет, ${u.first_name} (@${u.username || 'нет'})`);
-        }
+        // Имя пользователя
+        const user = tg.initDataUnsafe?.user;
+        const name = user ? user.first_name : "Сладкий";
+        chatEl.textContent = `Привет, ${name}... шлёпнешь меня? 💕`;
+        
+        updateUI();
     </script>
-
 </body>
 </html>
-
-
