@@ -83,19 +83,19 @@ let newLevel = Math.floor(count / 100) + 1;
 if (newLevel > level) {
     level = newLevel;
     alert(`Уровень ${level}! Королева стала горячее 🔥`);
-    document.getElementById('level').textContent = `Уровень: ${level}`;
-}
+    }
     function resetCount() {
     if (confirm('Сбросить все шлепки?')) {
         count = 0;
         localStorage.setItem('slapCount', 0);
         counterEl.textContent = `Шлепков: 0`;
     }
-}
+}document.getElementById('level').textContent = `Уровень: ${level}`;
 </script>
     <button onclick="resetCount()" style="margin-top:20px; background:#444; font-size:1.2em;">Сбросить</button>
 </body>
 
 </html>
+
 
 
