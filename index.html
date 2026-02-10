@@ -23,8 +23,8 @@
         }
         
         h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
+            font-size: 2.8em;
+            margin: 10px 0;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
         
@@ -33,55 +33,80 @@
             height: 320px;
             object-fit: cover;
             border-radius: 24px;
-            margin: 20px 0;
-            transition: transform 0.15s ease, box-shadow 0.3s;
+            margin: 15px 0;
+            transition: transform 0.15s ease, opacity 0.3s ease;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             user-select: none;
         }
         
         #level {
-            font-size: 1.6em;
-            margin: 10px 0;
+            font-size: 1.5em;
+            margin: 5px 0;
             font-weight: bold;
             color: #ffd700;
         }
         
         #counter {
-            font-size: 2.5em;
-            margin: 20px 0;
+            font-size: 2.4em;
+            margin: 10px 0;
             font-weight: bold;
         }
         
+        #chat {
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+            padding: 12px 20px;
+            margin: 15px 0;
+            max-width: 90%;
+            min-height: 60px;
+            font-size: 1.2em;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
         button {
-            font-size: 2.8em;
-            padding: 25px 80px;
-            background: #ff1493;
+            font-size: 2em;
+            padding: 18px 50px;
             border: none;
-            border-radius: 100px;
+            border-radius: 60px;
             color: white;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
             transition: all 0.2s;
             position: relative;
             overflow: hidden;
             touch-action: manipulation;
         }
         
-        button:active {
-            transform: scale(0.94);
+        #slap-btn {
+            background: #ff1493;
         }
         
-        /* Ripple эффект */
+        #reset-btn {
+            background: #555;
+            font-size: 1.4em;
+            padding: 12px 30px;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        /* Ripple */
         @keyframes rippleAnim {
             0% { transform: scale(0); opacity: 1; }
             100% { transform: scale(4); opacity: 0; }
         }
-        
         .ripple {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.7);
-            transform: scale(0);
+            background: rgba(255,255,255,0.7);
             animation: rippleAnim 0.7s linear;
             pointer-events: none;
         }
@@ -91,7 +116,6 @@
             0% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
             100% { opacity: 0; transform: translateY(-180px) scale(1.6) rotate(720deg); }
         }
-        
         .heart {
             position: fixed;
             pointer-events: none;
@@ -110,49 +134,89 @@
     <div id="level">Уровень: 1</div>
     <div id="counter">Шлепков: 0</div>
     
-    <button id="slap-btn">ШЛЁП!</button>
+    <div id="chat">Привет... ты готов меня шлёпать? 💕</div>
+    
+    <div class="buttons">
+        <button id="slap-btn">ШЛЁП!</button>
+        <button id="reset-btn">Сбросить прогресс</button>
+    </div>
 
     <script>
         Telegram.WebApp.ready();
         Telegram.WebApp.expand();
 
-        // Уровни и картинки
+        // Уровни и картинки (надёжные ссылки)
         const girlImages = {
-            1: "https://w0.peakpx.com/wallpaper/251/987/HD-wallpaper-anime-girl-pink-hair-band-aid-shy-expression-blushes-twintails-anime.jpg",     // Уровень 1: милая розовая
-            2: "https://w0.peakpx.com/wallpaper/32/733/HD-wallpaper-warrior-swords-sexy-pose-female-red-dress-sexy-blood-thighhighs-big-breasts-cool-warrior-torn-clothes-katana-hot-anime-girl-underboob.jpg", // Уровень 2: сексуальная в красном
-            3: "https://thumbs.dreamstime.com/b/beautiful-anime-young-girl-wearing-red-gold-embroidered-dress-standing-elegance-chinese-lanterns-art-358511511.jpg"  // Уровень 3: элегантная в золотом/красном
+            1: "https://w0.peakpx.com/wallpaper/251/987/HD-wallpaper-anime-girl-pink-hair-band-aid-shy-expression-blushes-twintails-anime.jpg",
+            2: "https://w0.peakpx.com/wallpaper/32/733/HD-wallpaper-warrior-swords-sexy-pose-female-red-dress-sexy-blood-thighhighs-big-breasts-cool-warrior-torn-clothes-katana-hot-anime-girl-underboob.jpg",
+            3: "https://w0.peakpx.com/wallpaper/693/429/HD-wallpaper-oriental-red-pretty-glow-splendid-cg-lantern-cheongsam-beautiful-sweet-nice-anime-hot-beauty-anime-girl-long-hair-light-gorgeous-female-lovely-glowing-purple-hair-sexy-girl-awesome.jpg"
+        };
+
+        // Реакции девушки (по уровням + случайные)
+        const reactions = {
+            1: [
+                "Ой... нежно, пожалуйста 💕",
+                "Ты такой смелый... мне нравится 😳",
+                "Ещё разок? Я стесняюсь...",
+                "Ммм... тепло разливается внутри...",
+                "Не останавливайся, милый~"
+            ],
+            2: [
+                "Сильнее! Я уже не такая стеснительная 😈",
+                "Дааа... вот так, шлёпай меня!",
+                "Ты заставляешь меня дрожать... 🔥",
+                "Хочешь увидеть, на что я способна?",
+                "Ещё! Я становлюсь горячее..."
+            ],
+            3: [
+                "Ты мой хозяин теперь... шлёпай без жалости 💦",
+                "Ахх... глубже, сильнее!",
+                "Я вся твоя... делай со мной что хочешь 😏",
+                "Мммм... я кончаю от твоих шлепков...",
+                "Хочешь меня всю? Продолжай~"
+            ]
         };
 
         let count = parseInt(localStorage.getItem('slapCount') || '0', 10);
         let currentLevel = 1;
+        let sessionSlaps = 0; // шлепки за текущую сессию
 
         const counterEl = document.getElementById('counter');
         const levelEl   = document.getElementById('level');
         const girlEl    = document.getElementById('girl');
-        const button    = document.getElementById('slap-btn');
+        const chatEl    = document.getElementById('chat');
+        const slapBtn   = document.getElementById('slap-btn');
+        const resetBtn  = document.getElementById('reset-btn');
         const container = document.body;
 
-        // Функция обновления уровня и картинки
         function updateLevelAndImage() {
-            let newLevel = 1;
-            if (count >= 800) newLevel = 3;
-            else if (count >= 300) newLevel = 2;
-
+            let newLevel = count >= 800 ? 3 : count >= 300 ? 2 : 1;
             if (newLevel !== currentLevel) {
                 currentLevel = newLevel;
                 levelEl.textContent = `Уровень: ${currentLevel}`;
-                girlEl.src = girlImages[currentLevel];
-                // Короткая анимация смены
+                girlEl.src = girlImages[currentLevel] || girlImages[1];
                 girlEl.style.opacity = 0;
-                setTimeout(() => { girlEl.style.opacity = 1; }, 200);
+                setTimeout(() => { girlEl.style.opacity = 1; }, 300);
+                showReaction("Уровень повышен! Я изменилась для тебя... 😘");
             }
+        }
+
+        function showReaction(text = null) {
+            if (!text) {
+                const lvlReactions = reactions[currentLevel] || reactions[1];
+                text = lvlReactions[Math.floor(Math.random() * lvlReactions.length)];
+            }
+            chatEl.textContent = text;
+            chatEl.style.opacity = 0;
+            setTimeout(() => { chatEl.style.opacity = 0.9; }, 100);
         }
 
         // Инициализация
         counterEl.textContent = `Шлепков: ${count}`;
-        updateLevelAndImage(); // Устанавливаем начальную картинку
+        updateLevelAndImage();
+        showReaction(); // первое приветствие
 
-        // Сердечки
+        // Сердечки и ripple (как раньше)
         function createHearts(x, y, qty = 18) {
             for (let i = 0; i < qty; i++) {
                 const heart = document.createElement('div');
@@ -161,50 +225,67 @@
                 heart.style.left = (x + (Math.random() - 0.5) * 240) + 'px';
                 heart.style.top  = (y + (Math.random() - 0.5) * 240) + 'px';
                 const dur = 1.1 + Math.random() * 0.7;
-                const scale = 0.9 + Math.random() * 0.8;
                 heart.style.animationDuration = dur + 's';
-                heart.style.transform = `scale(${scale}) rotate(${Math.random() * 720}deg)`;
+                heart.style.transform = `scale(${0.9 + Math.random() * 0.8}) rotate(${Math.random() * 720}deg)`;
                 container.appendChild(heart);
                 setTimeout(() => heart.remove(), dur * 1000 + 200);
             }
         }
 
-        // Ripple
         function createRipple(e) {
             const ripple = document.createElement('span');
-            const rect = button.getBoundingClientRect();
+            const rect = slapBtn.getBoundingClientRect();
             const size = Math.max(rect.width, rect.height) * 2;
             const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top  - size / 2;
+            const y = e.clientY - rect.top - size / 2;
             ripple.style.width = ripple.style.height = size + 'px';
             ripple.style.left = x + 'px';
-            ripple.style.top  = y + 'px';
+            ripple.style.top = y + 'px';
             ripple.classList.add('ripple');
-            button.appendChild(ripple);
+            slapBtn.appendChild(ripple);
             setTimeout(() => ripple.remove(), 700);
         }
 
         // Шлёпок
         function slap(e) {
             count += 1 + Math.floor(Math.random() * 6);
+            sessionSlaps++;
             counterEl.textContent = `Шлепков: ${count}`;
             localStorage.setItem('slapCount', count.toString());
 
             girlEl.style.transform = 'scale(1.25) rotate(8deg)';
-            setTimeout(() => { girlEl.style.transform = 'scale(1) rotate(0deg)'; }, 160);
+            setTimeout(() => girlEl.style.transform = 'scale(1) rotate(0deg)', 160);
 
             createRipple(e);
-            const rect = button.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top  + rect.height / 2;
-            createHearts(centerX, centerY);
+            const rect = slapBtn.getBoundingClientRect();
+            createHearts(rect.left + rect.width / 2, rect.top + rect.height / 2);
 
-            updateLevelAndImage(); // Проверяем уровень после каждого шлёпка
+            updateLevelAndImage();
+
+            // Реакция каждые 3–5 шлепков за сессию или всегда при смене уровня
+            if (sessionSlaps % (3 + Math.floor(Math.random() * 3)) === 0) {
+                showReaction();
+            }
         }
 
-        button.addEventListener('click', slap);
+        // Сброс прогресса
+        function resetProgress() {
+            if (confirm("Ты уверен? Всё обнулится, включая уровни и картинки.")) {
+                count = 0;
+                sessionSlaps = 0;
+                currentLevel = 1;
+                localStorage.setItem('slapCount', '0');
+                counterEl.textContent = `Шлепков: 0`;
+                levelEl.textContent = `Уровень: 1`;
+                girlEl.src = girlImages[1];
+                showReaction("Всё сначала... начнём заново? 😏");
+            }
+        }
 
-        // Приветствие
+        slapBtn.addEventListener('click', slap);
+        resetBtn.addEventListener('click', resetProgress);
+
+        // Приветствие с именем
         if (Telegram.WebApp.initDataUnsafe.user) {
             const u = Telegram.WebApp.initDataUnsafe.user;
             console.log(`Привет, ${u.first_name} (@${u.username || 'нет'})`);
