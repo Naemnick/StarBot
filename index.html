@@ -41,31 +41,43 @@
     <div id="counter">Шлепков: 0</div>
     <button onclick="slap()">ШЛЁП!</button>
 
-    <script>
-        // Инициализация Telegram Mini App
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand(); // Разворачиваем на весь экран
+<script>
+    // Инициализация Telegram Mini App
+    Telegram.WebApp.ready();
+    Telegram.WebApp.expand(); // Разворачиваем на весь экран
 
-        let count = 0;
-        const counterEl = document.getElementById('counter');
-        const girlEl = document.getElementById('girl');
+    // Загружаем сохранённый счёт (если есть)
+    let count = parseInt(localStorage.getItem('slapCount') || '0', 10);
 
-        function slap() {
-            count += 1 + Math.floor(Math.random() * 5); // + бонус
-            counterEl.textContent = `Шлепков: ${count}`;
+    const counterEl = document.getElementById('counter');
+    const girlEl = document.getElementById('girl');
 
-            // Простая анимация "тряски"
-            girlEl.style.transform = 'scale(1.2)';
-            setTimeout(() => { girlEl.style.transform = 'scale(1)'; }, 100);
+    // Обновляем отображение при загрузке
+    counterEl.textContent = `Шлепков: ${count}`;
 
-            // Позже здесь можно отправлять данные на сервер
-            console.log('Шлепок от пользователя:', Telegram.WebApp.initDataUnsafe.user?.username || 'аноним');
-        }
+    function slap() {
+        count += 1 + Math.floor(Math.random() * 5); // + бонус 1–5
+        counterEl.textContent = `Шлепков: ${count}`;
 
-        // Показываем данные пользователя (для теста)
-        if (Telegram.WebApp.initDataUnsafe.user) {
-            console.log('Привет,', Telegram.WebApp.initDataUnsafe.user.first_name);
-        }
-    </script>
+        // Сохраняем в localStorage
+        localStorage.setItem('slapCount', count);
+
+        // Анимация "тряски"
+        girlEl.style.transform = 'scale(1.2)';
+        setTimeout(() => { girlEl.style.transform = 'scale(1)'; }, 100);
+
+        // Для отладки: кто шлёпает (в консоль браузера)
+        console.log('Шлепок от:', Telegram.WebApp.initDataUnsafe.user?.username || 'аноним');
+    }
+
+    // Опционально: приветствие с именем пользователя
+    if (Telegram.WebApp.initDataUnsafe.user) {
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        console.log('Привет,', user.first_name, user.username ? '@' + user.username : '');
+        // Можно добавить в интерфейс, например:
+        document.querySelector('h1').textContent = `Привет, ${user.first_name}! SexyStar 😈`;
+    }
+</script>
 </body>
+
 </html>
