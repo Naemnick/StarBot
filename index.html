@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SexyStar - Шлёпай!</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #ff69b4, #8a2be2);
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        h1 { font-size: 3em; margin-bottom: 20px; }
+        #counter { font-size: 4em; margin: 20px; }
+        #girl { font-size: 8em; margin: 20px; transition: transform 0.1s; }
+        button {
+            font-size: 2.5em;
+            padding: 20px 60px;
+            background: #ff1493;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+    <h1>SexyStar 😈</h1>
+    <div id="girl">👩‍🦰</div> <!-- placeholder для девушки, позже заменишь на картинку -->
+    <div id="counter">Шлепков: 0</div>
+    <button onclick="slap()">ШЛЁП!</button>
+
+    <script>
+        // Инициализация Telegram Mini App
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand(); // Разворачиваем на весь экран
+
+        let count = 0;
+        const counterEl = document.getElementById('counter');
+        const girlEl = document.getElementById('girl');
+
+        function slap() {
+            count += 1 + Math.floor(Math.random() * 5); // + бонус
+            counterEl.textContent = `Шлепков: ${count}`;
+
+            // Простая анимация "тряски"
+            girlEl.style.transform = 'scale(1.2)';
+            setTimeout(() => { girlEl.style.transform = 'scale(1)'; }, 100);
+
+            // Позже здесь можно отправлять данные на сервер
+            console.log('Шлепок от пользователя:', Telegram.WebApp.initDataUnsafe.user?.username || 'аноним');
+        }
+
+        // Показываем данные пользователя (для теста)
+        if (Telegram.WebApp.initDataUnsafe.user) {
+            console.log('Привет,', Telegram.WebApp.initDataUnsafe.user.first_name);
+        }
+    </script>
+</body>
+</html>
