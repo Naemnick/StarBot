@@ -22,11 +22,11 @@
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
-            touch-action: none; /* Запрещает стандартные жесты браузера */
+            touch-action: none;
         }
         
         h1 {
-            font-size: 2.4em;
+            font-size: 2.2em;
             margin: 10px 0;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
@@ -43,7 +43,7 @@
         }
         
         #level {
-            font-size: 1.4em;
+            font-size: 1.3em;
             margin: 5px 0;
             font-weight: bold;
             color: #ffd700;
@@ -61,7 +61,7 @@
             padding: 12px 20px;
             margin: 10px 0;
             width: 85%;
-            min-height: 50px;
+            min-height: 55px;
             font-size: 1.1em;
             display: flex;
             align-items: center;
@@ -72,7 +72,7 @@
         .buttons {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
             margin-top: 15px;
             width: 80%;
             max-width: 300px;
@@ -92,34 +92,36 @@
         #slap-btn {
             background: #ff1493;
             font-size: 2em;
-            padding: 20px;
+            padding: 18px;
             font-weight: bold;
             touch-action: manipulation;
         }
         
         #slap-btn:active {
             transform: scale(0.92);
+            background: #ff45a5;
         }
         
         #reset-btn {
             background: rgba(255, 255, 255, 0.15);
             font-size: 0.9em;
-            padding: 12px;
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px;
+            color: #eee;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: none;
         }
 
         #reset-btn:active {
-            background: rgba(255, 0, 0, 0.4);
+            background: rgba(255, 0, 0, 0.3);
+            border-color: rgba(255, 0, 0, 0.5);
         }
 
         .ripple {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.7);
             transform: scale(0);
-            animation: rippleAnim 0.5s linear;
+            animation: rippleAnim 0.6s linear;
             pointer-events: none;
         }
         @keyframes rippleAnim {
@@ -130,12 +132,12 @@
             position: fixed;
             pointer-events: none;
             z-index: 9999;
-            font-size: 1.8em;
+            font-size: 2em;
             animation: floatHeart 1.2s ease-out forwards;
         }
         @keyframes floatHeart {
             0% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-            100% { opacity: 0; transform: translateY(-180px) scale(1.6) rotate(45deg); }
+            100% { opacity: 0; transform: translateY(-200px) scale(1.5) rotate(45deg); }
         }
     </style>
 </head>
@@ -148,11 +150,11 @@
     <div id="level">Уровень: 1</div>
     <div id="counter">Шлепков: 0</div>
     
-    <div id="chat">Привет... ты готов? 💕</div>
+    <div id="chat">Привет... ты готов начать? 💕</div>
     
     <div class="buttons">
         <button id="slap-btn">ШЛЁП!</button>
-        <button id="reset-btn">Сбросить прогресс</button>
+        <button id="reset-btn">Сбросить всё</button>
     </div>
 
     <script>
@@ -167,9 +169,9 @@
         };
 
         const reactions = {
-            1: ["Ой... нежно, пожалуйста 💕", "Ты такой смелый... 😳", "Ещё разок?", "Ммм... тепло разливается..."],
-            2: ["Сильнее! Я уже не такая скромная 😈", "Дааа... вот так!", "Ты меня заводишь... 🔥", "Ещё! Становится жарко!"],
-            3: ["Я вся твоя... делай что хочешь 😏", "Ахх... глубже, сильнее!", "Шлёпай меня без жалости 💦", "Ты мой хозяин!"]
+            1: ["Ой... нежно, пожалуйста 💕", "Ты такой смелый... 😳", "Ещё разок?", "Ммм... мне нравится..."],
+            2: ["Сильнее! Я уже не стесняюсь 😈", "Дааа... вот так!", "Ты меня заводишь... 🔥", "Ещё! Становится горячо!"],
+            3: ["Я вся твоя... делай что хочешь 😏", "Ахх... глубже!", "Шлёпай меня сильнее! 💦", "Ты мой господин!"]
         };
 
         let count = parseInt(localStorage.getItem('slapCount') || '0', 10);
@@ -189,7 +191,7 @@
             if (newLevel !== currentLevel || !girlEl.src) {
                 currentLevel = newLevel;
                 girlEl.src = girlImages[currentLevel];
-                if (sessionSlaps > 0) showReaction("Ох... я изменилась для тебя... 😘");
+                if (sessionSlaps > 0) showReaction("Ох... новый уровень! Посмотри на меня... 😘");
             }
             
             levelEl.textContent = `Уровень: ${currentLevel}`;
@@ -205,8 +207,9 @@
         }
 
         function createEffect(clientX, clientY) {
-            // Ripple на кнопке
             const rect = slapBtn.getBoundingClientRect();
+            
+            // Ripple
             const ripple = document.createElement('span');
             ripple.className = 'ripple';
             const size = Math.max(rect.width, rect.height);
@@ -214,14 +217,14 @@
             ripple.style.left = (clientX - rect.left - size/2) + 'px';
             ripple.style.top = (clientY - rect.top - size/2) + 'px';
             slapBtn.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 500);
+            setTimeout(() => ripple.remove(), 600);
 
-            // Вылетающее сердечко
+            // Heart
             const heart = document.createElement('div');
             heart.className = 'heart';
-            heart.innerHTML = Math.random() > 0.5 ? '💖' : '🔥';
-            heart.style.left = (clientX - 15) + 'px';
-            heart.style.top = (clientY - 15) + 'px';
+            heart.innerHTML = Math.random() > 0.3 ? '💖' : '🔥';
+            heart.style.left = (clientX - 20) + 'px';
+            heart.style.top = (clientY - 20) + 'px';
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 1200);
         }
@@ -229,48 +232,42 @@
         function handleSlap(e) {
             if (e.type === 'touchstart') e.preventDefault();
             
-            // Рандомный бонус к шлепку (от 1 до 3)
             count += 1 + Math.floor(Math.random() * 2);
             sessionSlaps++;
             localStorage.setItem('slapCount', count);
 
-            // Анимация картинки
-            girlEl.style.transform = `scale(1.15) rotate(${Math.random() * 6 - 3}deg)`;
+            // Animation
+            girlEl.style.transform = `scale(1.2) rotate(${Math.random() * 8 - 4}deg)`;
             setTimeout(() => girlEl.style.transform = 'scale(1) rotate(0)', 100);
 
-            // Координаты для эффектов
             const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const clientY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
             createEffect(clientX, clientY);
 
             updateUI();
-
-            if (sessionSlaps % 6 === 0) showReaction();
+            if (sessionSlaps % 5 === 0) showReaction();
         }
 
         function resetProgress() {
-            if (confirm("Ты уверен, что хочешь обнулить прогресс и уровни?")) {
+            if (confirm("Ты действительно хочешь обнулить все достижения и начать сначала?")) {
                 count = 0;
                 sessionSlaps = 0;
                 localStorage.setItem('slapCount', '0');
                 updateUI();
-                showReaction("Всё сначала... начнём заново? 😏");
+                showReaction("Всё забыто... начнём заново? 😏");
             }
         }
 
-        // Обработка событий
         slapBtn.addEventListener('touchstart', handleSlap, {passive: false});
         slapBtn.addEventListener('mousedown', (e) => {
-            // Чтобы не срабатывало дважды на телефонах
             if (window.matchMedia("(pointer: coarse)").matches) return;
             handleSlap(e);
         });
         
         resetBtn.addEventListener('click', resetProgress);
 
-        // Инициализация при запуске
         const user = tg.initDataUnsafe?.user;
-        const name = user ? user.first_name : "Милый";
+        const name = user ? user.first_name : "Милашка";
         chatEl.textContent = `Привет, ${name}... шлёпнешь меня? 💕`;
         
         updateUI();
